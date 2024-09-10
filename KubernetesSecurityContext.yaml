@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-pod
+  labels:
+    app: my-secure-app
+spec:
+  securityContext:
+    runAsUser: 1000            # Run as a specific non-root user
+    runAsGroup: 3000           # Run as a specific group
+    fsGroup: 2000              # The file system group for volumes
+    seccompProfile:             # Enable seccomp for the pod
+      type: RuntimeDefault
+  containers:
+  - name: secure-container
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    securityContext:
+      runAsUser: 1001          # Container-level user override
+      allowPrivilegeEscalation: false   # Disable privilege escalation
+      capabilities:
+        drop:
+          - ALL                # Drop all capabilities
+        add:
+          - NET_BIND_SERVICE   # Add specific capabilities, such as binding to a low port
+      readOnlyRootFilesystem: true      # Set root filesystem as read-only
+      privileged: false         # Ensure the container does not run in privileged mode
